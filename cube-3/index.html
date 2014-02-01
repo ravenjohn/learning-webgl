@@ -1,0 +1,186 @@
+<!--
+    Raven John M. Lagrimas
+    2010-43168
+    CMSC 161 UV-2L
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>161</title>
+        <style>
+            *{
+                font-family: 'Lucida Sans';
+            }
+            html{
+                overflow: hidden;
+                background: #000;
+                position: relative;
+            }
+            body{
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #config_section{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 200px;
+                overflow: auto;
+                font-size: 14px;
+                background: #1A1A1A;
+                color: #FFF;
+            }
+            h3{
+                display: block;
+                background: #2980b9;
+                color: #FFF;
+                text-align: center;
+                padding: 5px 0;
+            }
+            h5{
+                color: #CCC;
+                padding: 2px 0;
+            }
+            h3, h5{
+                margin: 0;
+                font-weight: normal;
+            }
+            input[type="number"]{
+                width: 40px;
+                font-size: 10px;
+            }
+            #canvas_section{
+                text-align: center;
+                height: 100%;
+                margin-left: 200px;
+            }
+            canvas{
+                background: #CCC;
+                display: inline-block;
+            }
+            table{
+                border-collapse: collapse;
+                border-spacing: 0;
+                width: 100%;
+            }
+            td{
+                width: 50%;
+            }
+            td:last-child{
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <section id="config_section">
+            <h3>Model Matrix</h3>
+            <h5>Translation</h5>
+            x: <input id="tx" type="number" value="0" step="0.01" autofocus="autofocus" />
+            y: <input id="ty" type="number" value="0" step="0.01" />
+            z: <input id="tz" type="number" value="0" step="0.01" />
+            <h5>Rotation</h5>
+            x: <input id="rx" type="number" value="0" step="1" />
+            y: <input id="ry" type="number" value="0" step="1" />
+            z: <input id="rz" type="number" value="0" step="1" />
+            <h5>Scaling</h5>
+            x: <input id="sx" type="number" value="1" step="0.01" />
+            y: <input id="sy" type="number" value="1" step="0.01" />
+            z: <input id="sz" type="number" value="1" step="0.01" />
+            <br /><br />
+            <h3>View Matrix (Look at)</h3>
+            <h5>Eye Position</h5>
+            x: <input id="ex" type="number" value="0" step="0.01" />
+            y: <input id="ey" type="number" value="0" step="0.01" />
+            z: <input id="ez" type="number" value="1" step="0.01" />
+            <h5>Look At Position</h5>
+            x: <input id="cx" type="number" value="0" step="0.01" />
+            y: <input id="cy" type="number" value="0" step="0.01" />
+            z: <input id="cz" type="number" value="0" step="0.01" />
+            <h5>Up Vector</h5>
+            x: <input id="ux" type="number" value="0" step="0.01" />
+            y: <input id="uy" type="number" value="1" step="0.01" />
+            z: <input id="uz" type="number" value="0" step="0.01" />
+            <br /><br />
+            <h3>Perspective Matrix</h3>
+            <input type="radio" id="type1" name="type" value="Orthographic" checked="checked" />Orthographic
+            <table>
+                <tbody>
+                    <tr>
+                        <td>left</td>
+                        <td><input id="l" type="number" value="-1" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>right</td>
+                        <td><input id="r" type="number" value="1" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>bottom</td>
+                        <td><input id="b" type="number" value="-1" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>top</td>
+                        <td><input id="t" type="number" value="1" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>near</td>
+                        <td><input id="n" type="number" value="0" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>far</td>
+                        <td><input id="f" type="number" value="2" step="0.01" /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <input type="radio" id="type2" name="type" value="Perspective" />Perspective
+            <table>
+                <tbody>
+                    <tr>
+                        <td>field of view (Y)</td>
+                        <td><input id="fovy" type="number" value="45" step="1" /></td>
+                    </tr>
+                    <tr>
+                        <td>aspect ratio</td>
+                        <td><input id="aspect" type="number" value="1" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>near</td>
+                        <td><input id="np" type="number" value="0.3" step="0.01" /></td>
+                    </tr>
+                    <tr>
+                        <td>far</td>
+                        <td><input id="fp" type="number" value="3" step="0.01" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section id="canvas_section">
+            <canvas id="c"></canvas>
+            <canvas id="d"></canvas>
+        <section>
+        <script type="x-shader/x-vertex" id="vshader">
+            attribute vec3 aPosition;
+            attribute vec4 aColor;
+            varying vec4 vColor;
+
+            uniform mat4 uModelMatrix;
+            uniform mat4 uViewMatrix;
+            uniform mat4 uPerspectiveMatrix;
+            void main() {
+                gl_Position = uPerspectiveMatrix * uViewMatrix * uModelMatrix *  vec4(aPosition, 1);
+                vColor = aColor;
+            }
+        </script>
+        <script type="x-shader/x-fragment" id="fshader">
+            precision mediump float;
+            varying vec4 vColor;
+            void main() {
+                gl_FragColor = vColor;
+            }
+        </script>
+        <script type="text/javascript" src="initUtils.js"></script>
+        <script type="text/javascript" src="gl-matrix-min.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>

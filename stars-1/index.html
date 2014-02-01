@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CMSC 161 Exer 1</title>
+		<style type="text/css">
+			*{
+				height: 100%;
+				width: 100%;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="c"></canvas>
+		<script type="x-shader/x-vertex" id="vshader">
+			attribute vec3 aPosition;
+			attribute float pointSize;
+			
+			void main() {
+				gl_Position = vec4(aPosition,1.0);
+				gl_PointSize = pointSize;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fshader">
+			precision mediump float;
+		
+			uniform vec4 uFragColor;
+			void main() {
+				gl_FragColor = uFragColor;
+			}
+		</script>
+		<script type="text/javascript" src="initUtils.js"></script>
+		<script>
+			(function(root){
+				var randomPoints = function(gl){
+					var i, rand = function(){
+							return Math.random()*(parseInt(Math.random()*2, 10) ? 1 : -1);
+						};
+					gl.clearColor(0.0, 0.0, 0.0, 1.0); // black
+					gl.clear(gl.COLOR_BUFFER_BIT);
+					gl.vertexAttrib1f(gl.attr("pointSize"),5);
+					for(i=0; i < pointCount; i+= 1){
+						gl.uniform4f(gl.uniform("uFragColor"),Math.random(),Math.random(),Math.random(),1.0);
+						gl.vertexAttrib3f(gl.attr("aPosition"),rand(),rand(),1);
+						gl.drawArrays(gl.POINTS,0,1);
+					}
+				},
+				draw = function(canvas){
+					randomPoints(HERALD.initWebGL(canvas).setProgram(HERALD.initProgram(HERALD.initShader("vshader"), HERALD.initShader("fshader"))));
+				},
+				canvas = document.getElementById("c"),
+				pointCount = parseInt(location.hash.substring(1), 10) || 10;
+				
+				canvas.onclick = function(ev){
+					var halfWidth = canvas.width/2,
+						halfHeight = canvas.height/2,
+						gl = HERALD.getGL();
+					gl.viewport(0, 0, canvas.width, canvas.height);
+					randomPoints(gl);
+					gl.uniform4f(gl.uniform("uFragColor"),1,1,1,1.0); //red
+					gl.vertexAttrib3f(gl.attr("aPosition"),(ev.layerX - halfWidth) / halfWidth,(halfHeight - ev.layerY) / halfHeight, 1);
+					gl.vertexAttrib1f(gl.attr("pointSize"),15);
+					gl.drawArrays(gl.POINTS,0,1);
+				};
+				
+				(window.onresize = function(){
+					canvas.width = window.innerWidth;
+					canvas.height = window.innerHeight;
+					draw(canvas);
+				})();
+			})(this);
+		</script>
+	</body>
+</html>
