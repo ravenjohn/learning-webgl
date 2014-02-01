@@ -113,5 +113,19 @@
             angle = easing((counter++%200), angle % 360, 360, 3000);
             main();
         }, 10);
+    
+    jarvis.learn([
+        ["rotate", function () {
+            interval = setInterval(function () {
+                angle = easing((counter++%200), angle % 360, 360, 3000);
+                main();
+            }, 10);
+        }],
+        ["stop", function () {
+            clearInterval(interval);
+        }]
+    ]);
+    jarvis.debug = true;
+    jarvis.start();
 
 } (this) );
