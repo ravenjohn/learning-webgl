@@ -22,35 +22,45 @@
                         i,
                         temp,
                         ret = [];
-                    for (i = 0; i < v.length; i+=9) {
-                        ret = ret.concat(0,0,1, 0,0,1, 0,0,1);
-                        // b = v.slice(i+3, i+6);
-                        // temp = normalize(cross(minus(b, v.slice(i,i+3)), minus(b, v.slice(i+6, i+9))));
-                        // ret = ret.concat(temp, temp.slice(), temp.slice());
+                    for (i = 0; i < 18 * sides; i+=18) {
+                        // ret = ret.concat(0,0,1, 0,0,1, 0,0,1);
+                        b = v.slice(i+3, i+6);
+                        temp = normalize(cross(minus(b, v.slice(i,i+3)), minus(b, v.slice(i+6, i+9))));
+                        ret = ret.concat(
+                            temp, temp.slice(), temp.slice(),
+                            temp.slice(), temp.slice(), temp.slice()
+                        );
+                    }
+                    for (; i < v.length; i+=9) {
+                        // ret = ret.concat(0,0,1, 0,0,1, 0,0,1);
+                        b = v.slice(i+3, i+6);
+                        temp = normalize(cross(minus(b, v.slice(i,i+3)), minus(b, v.slice(i+6, i+9))));
+                        ret = ret.concat(temp, temp.slice(), temp.slice());
                     }
                     return ret;
                 },
-                sides = 50,
+                sides = 200,
                 vertices = [];
 
-            for (; temp < sides;  temp += 1) {
+            for (temp = 0; temp < sides;  temp += 1) {
+                vertices.push( Math.cos(temp * 2 * Math.PI / sides), Math.sin(temp * 2 * Math.PI / sides), 0,
+                               Math.cos(temp * 2 * Math.PI / sides), Math.sin(temp * 2 * Math.PI / sides), 2,
+                               Math.cos((temp + 1) * 2 * Math.PI / sides), Math.sin((temp + 1) * 2 * Math.PI / sides), 2,
+                               
+                               Math.cos((temp + 1) * 2 * Math.PI / sides), Math.sin((temp + 1) * 2 * Math.PI / sides), 2,
+                               Math.cos(temp * 2 * Math.PI / sides), Math.sin(temp * 2 * Math.PI / sides), 0,
+                               Math.cos((temp + 1) * 2 * Math.PI / sides), Math.sin((temp + 1) * 2 * Math.PI / sides), 0);
+            }
+            for (temp = 0; temp < sides;  temp += 1) {
                 vertices.push( Math.cos(temp * 2 * Math.PI / sides), Math.sin(temp * 2 * Math.PI / sides), 0,
                                0, 0, 0,
                                Math.cos((temp + 1) * 2 * Math.PI / sides), Math.sin((temp + 1) * 2 * Math.PI / sides), 0);
             }
-            vertices[vertices.length - 3] = vertices[0];
-            vertices[vertices.length - 2] = vertices[1];
-            vertices[vertices.length - 1] = vertices[2];
-            console.log(vertices);
             for (temp = 0; temp < sides;  temp += 1) {
                 vertices.push( Math.cos(temp * 2 * Math.PI / sides), Math.sin(temp * 2 * Math.PI / sides), 2,
                                0, 0, 2,
                                Math.cos((temp + 1) * 2 * Math.PI / sides), Math.sin((temp + 1) * 2 * Math.PI / sides), 2);
             }
-            vertices[vertices.length - 1] = vertices[2];
-            vertices[vertices.length - 2] = vertices[1];
-            vertices[vertices.length - 3] = vertices[0];
-            console.log(vertices.length);
 
             c.width = root.innerWidth;
             c.height = root.innerHeight;
@@ -71,7 +81,7 @@
 
             temp = -1;
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer = gl.createBuffer());
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(Array.apply(0, Array(vertices.length / 3)).map(function () {return temp+=1;})), gl.STATIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(Array.apply(0, Array(vertices.length / 3)).map(function () {return temp+=1;})), gl.STATIC_DRAW);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
             mat4.rotateX(modelMatrix = mat4.create(), modelMatrix, glMatrix.toRadian(angle));
@@ -98,7 +108,7 @@
             gl.enable(gl.DEPTH_TEST);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer);
-            gl.drawElements(gl.TRIANGLES, vertices.length / 3, gl.UNSIGNED_BYTE, 0);
+            gl.drawElements(gl.TRIANGLES, vertices.length / 3, gl.UNSIGNED_SHORT, 0);
         },
         easing = function (t, b, c, d) {
             t /= d/2;
